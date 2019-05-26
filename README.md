@@ -18,4 +18,9 @@ sed -i 's/^#PubkeyAuthentication.*$/PubkeyAuthentication yes/g' /etc/ssh/sshd_co
 systemctl restart sshd.service
 ```
 
+```
+# 配置ansible ssh密钥登陆
+ssh-keygen -t rsa -b 2048 回车 回车 回车
+ssh-copy-id $IP #$IP为本虚机地址，按照提示输入yes 和root密码
+```
  
