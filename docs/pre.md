@@ -1,8 +1,8 @@
 #  准备工作
 
-## 允许远程登录
+## 允许远程登录 
 
-* 修改文件 /etc/ssh/ssh_config 
+* 修改文件 /etc/ssh/ssh_config , m1 m2 m3 m4
 
 ```bash
 # 允许root远程登录
@@ -14,8 +14,24 @@ sed -i 's/^#PubkeyAuthentication.*$/PubkeyAuthentication yes/g' /etc/ssh/sshd_co
 systemctl restart sshd.service
 ```
 
+## 配置hosts(m1 m2 m3 m4)
+
+* /etc/hosts  
+
+```bash
+cat > /etc/hosts << EOF 
+127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
+::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
+192.168.20.11 m1
+192.168.20.12 m2
+192.168.20.13 m3
+192.168.20.14 m4
+EOF
+```
+
 ## 配置免密登录
 
+* m1 上执行 
 
 ```bash
 # 配置ansible ssh密钥登陆  命令后面三个  回车 回车 回车
@@ -26,4 +42,5 @@ ssh-copy-id root@m2
 ssh-copy-id root@m3
 ssh-copy-id root@m4
 ```
+
  
