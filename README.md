@@ -2,9 +2,9 @@
 
 
 * [大数据基本概念](docs/introduce.md)
-* [准备工作](docs/pre.md)
-* [安装JDK](docs/install_JDK.md)
-* [安装HDFS系统](docs/install.md)
+* [HDFS](docs/hdcs_introduce.md)
+  * [安装HDFS系统](https://github.com/qiujiahong/hdp_cluster)
+  * [HDFS客户端](docs/command.md)
 
 
 6 

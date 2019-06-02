@@ -43,4 +43,11 @@ ssh-copy-id root@m3
 ssh-copy-id root@m4
 ```
 
+
+## 关闭防火墙
+
+```
+
+```
+
  

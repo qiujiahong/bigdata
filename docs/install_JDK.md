@@ -76,3 +76,6 @@ ssh root@$node "ln -s /apps/jdk* /apps/jdk"
 ssh root@$node "sh /tmp/jdk.sh"
 done
 ```
+
+
+
