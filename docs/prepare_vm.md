@@ -65,15 +65,16 @@ vagrant up
 
 * 依次登录服务器，修改ssh配置  
 
-```bash
+```bash 
 # 登录服务器 node1 node2 node3 node4
 vagrant ssh node1
 # 切换用户
 su root
-# 修改文件  PasswordAuthentication yes
-vi /etc/ssh/sshd_config
-# 重启ssh 服务
-systemctl restart sshd.service
+sed -i "s/^PermitRootLogin.*/PermitRootLogin yes/g" /etc/ssh/sshd_config
+sed -i "s/^PasswordAuthentication.*/PasswordAuthentication yes/g" /etc/ssh/sshd_config
+service sshd restart
+# passwd
+echo "passwod" |passwd --stdin 
 ```
 
 ## 配置ssh 免密登录  

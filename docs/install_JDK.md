@@ -36,6 +36,13 @@ for node in ${array[@]}; do
 echo "$node ......";
 ssh root@$node "sh ./jdk.sh"
 done
+
+# 清除 
+array=(node1 node2 node3 node4)
+for node in ${array[@]}; do 
+echo "$node ......";
+ssh root@$node "rm -rf jdk-8u211-linux-x64.tar.gz"
+done
 ```
 
 
