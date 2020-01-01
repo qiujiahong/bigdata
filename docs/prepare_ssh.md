@@ -12,12 +12,14 @@ cat <<  EOF >> /etc/hosts
 10.170.0.10 node4
 EOF
 
-# 配置秘钥
+# 配置秘钥 node1上root执行
 ssh-keygen -t rsa
 ssh-copy-id root@node1
 ssh-copy-id root@node2
 ssh-copy-id root@node3
 ssh-copy-id root@node4
+
+
 
 
 # 分发host到其他节点
