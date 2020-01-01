@@ -51,6 +51,46 @@ ssh root@$node   "echo 'server.2=node2:2888:3888' >>  /apps/apache-zookeeper-3.5
 ssh root@$node   "echo 'server.3=node3:2888:3888' >>  /apps/apache-zookeeper-3.5.6-bin/conf/zoo.cfg"
 done
 
+# 配置JAVA_HOME环境变量
+array=(node1 node2 node3)
+for node in ${array[@]}; do 
+echo "$node ......config file";
+ssh root@$node   "sed -i '/java_home_var/d' /apps/apache-zookeeper-3.5.6-bin/bin/zkEnv.sh"
+ssh root@$node   "sed -i '1 aexport JAVA_HOME=/apps/jdk1.8.0_211  # java_home_var'  /apps/apache-zookeeper-3.5.6-bin/bin/zkEnv.sh"
+done
+```
+
+## 启动服务
+
+```BASH 
+array=(node1 node2 node3)
+for node in ${array[@]}; do 
+echo "$node ......start zookeeper";
+sleep 3;
+ssh root@$node   "/apps/apache-zookeeper-3.5.6-bin/bin/zkServer.sh start"
+done 
+```
+
+## 停止服务
+
+```BASH 
+array=(node1 node2 node3)
+for node in ${array[@]}; do 
+echo "$node ......stop zookeeper";
+ssh root@$node   "/apps/apache-zookeeper-3.5.6-bin/bin/zkServer.sh stop"
+done
+```
+
+## 检查状态
+
+```BASH 
+echo "check zookeeper status............................................start"
+array=(node1 node2 node3)
+for node in ${array[@]}; do 
+echo "$node ......check zookeeper status";
+ssh root@$node   "/apps/apache-zookeeper-3.5.6-bin/bin/zkServer.sh status"
+done
+echo "check zookeeper status............................................end"
 ```
 
 
@@ -64,4 +104,4 @@ echo "${array[$num]}......";
 ssh root@${array[$num]} "rm -rf apache-zookeeper-3.5.6-bin.tar.gz"
 ssh root@$node "rm -rf /apps/apache-zookeeper-3.5.6-bin/"
 done ;
-```
+```  
