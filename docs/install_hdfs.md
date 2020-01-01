@@ -192,29 +192,34 @@ ssh root@$node   "rm -rf    /data/hadoop/data/*"
 ssh root@$node   "rm -rf    /data/hadoop/name/*"
 done
 
-# 3.启动hdfs集群
-source /apps/hadoop-3.1.2/etc/hadoop/param.sh
-echo "wait for 10 seconds before format............................................."
-sleep 10
-ssh appuser@$hdfs_name_node "/apps/hadoop-3.1.2/bin/hdfs namenode -format"
-echo "wait for 5 seconds start hdfs............................................."
-sleep 10
-echo "start namenode............................................."
-ssh appuser@$hdfs_name_node "/apps/hadoop-3.1.2/bin/hdfs --daemon start namenode && /apps/jdk1.8.0_211/bin/jps | grep NameNode"
-sleep 5
+# 3.启动hdfs集群,打开hdfs集群，在namenode上执行，需要namenode到datanode做了免密登录
+sudo appuser
+start-dfs.sh
 
-echo "start secondnamenode............................................."
-ssh appuser@$hdfs_name_node2 "/apps/hadoop-3.1.2/bin/hdfs --daemon start secondarynamenode && /apps/jdk1.8.0_211/bin/jps | grep SecondaryNameNode"
+# source /apps/hadoop-3.1.2/etc/hadoop/param.sh
+# echo "wait for 10 seconds before format............................................."
+# sleep 10
+# ssh appuser@$hdfs_name_node "/apps/hadoop-3.1.2/bin/hdfs namenode -format"
+# echo "wait for 5 seconds start hdfs............................................."
+# sleep 10
+# echo "start namenode............................................."
+# ssh appuser@$hdfs_name_node "/apps/hadoop-3.1.2/bin/hdfs --daemon start namenode && /apps/jdk1.8.0_211/bin/jps | grep NameNode"
+# sleep 5
 
-echo "start datanode............................................."
-for node in ${hdfs_data_nodes[@]}; do 
-ssh appuser@$node "/apps/hadoop-3.1.2/bin/hdfs --daemon start  datanode | /apps/jdk1.8.0_211/bin/jps | grep DataNode"
-done 
+# echo "start secondnamenode............................................."
+# ssh appuser@$hdfs_name_node2 "/apps/hadoop-3.1.2/bin/hdfs --daemon start secondarynamenode && /apps/jdk1.8.0_211/bin/jps | grep SecondaryNameNode"
+
+# echo "start datanode............................................."
+# for node in ${hdfs_data_nodes[@]}; do 
+# ssh appuser@$node "/apps/hadoop-3.1.2/bin/hdfs --daemon start  datanode | /apps/jdk1.8.0_211/bin/jps | grep DataNode"
+# done 
 ```
 
 ## 检查
 
+* 命令检查
 ```bash
+
 source /apps/hadoop-3.1.2/etc/hadoop/param.sh
 echo "check the NameNode ............................................."
 ssh appuser@$hdfs_name_node "/apps/jdk1.8.0_211/bin/jps | grep NameNode"
@@ -231,10 +236,34 @@ echo "check end............................................."
 
 ```
 
+* 页面检查  
+
+```bash 
+#访问页面: http://192.168.2.11:9870 (其中ip是namenode的地址),在该网页上能够看到datanode状态及容量。或者使用命令
+curl http://127.0.0.1:9870
+```
+
+* 存储文件检查,更多命令详细看[HDFS客户端](command.md)   
+
+```bash 
+su appuser 
+# 创建一个文件夹，在查看该目录
+hadoop fs -mkdir  -p /aaa/bbb
+hadoop fs -ls /aaa
+# 写入一个文件，然后再查看文件
+cd /data/hadoop
+echo "1111www" > 1.file 
+hadoop fs -put 1.file  /aaa/bbb
+hadoop fs -ls /aaa/bbb
+hadoop fs -cat /aaa/bbb/1.file
+```
+
 
 ## 停止
 
 ```bash 
+# 关闭hdfs集群，在namenode[node1]上执行，需要namenode到datanode做了免密登录
+stop-dfs.sh
 ```
 
 ## 卸载
@@ -250,6 +279,23 @@ ssh root@$node "rm -rf /apps/hadoop-3.1.2/"
 ssh root@$node "rm -rf /data/hadoop/"
 ssh root@$node "source /etc/profile"
 done
+```
 
+## 其他命令
 
+```BASH
+# 关闭hdfs集群，在namenode上执行，需要namenode到datanode做了免密登录
+stop-dfs.sh
+# 打开hdfs集群，在namenode上执行，需要namenode到datanode做了免密登录
+start-dfs.sh
+# 启动namenode 
+hdfs --daemon start namenode
+# 启动datanode 
+hdfs --daemon start datanode
+# 停止namenode 
+hdfs --daemon start namenode
+# 停止datanode 
+hdfs --daemon start datanode
+hdfs --daemon start secondarynamenode
+hdfs --daemon stop secondarynamenode
 ```
