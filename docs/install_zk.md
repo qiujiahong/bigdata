@@ -66,9 +66,24 @@ done
 array=(node1 node2 node3)
 for node in ${array[@]}; do 
 echo "$node ......start zookeeper";
-sleep 3;
-ssh root@$node   "/apps/apache-zookeeper-3.5.6-bin/bin/zkServer.sh start"
+ssh root@$node   "chown -R appuser:appuser   /apps/apache-zookeeper-3.5.6-bin/"
+# 注意这里是使用非root启动
+ssh appuser@$node   "/apps/apache-zookeeper-3.5.6-bin/bin/zkServer.sh start"
 done 
+```
+
+
+
+## 检查状态
+
+```BASH 
+echo "check zookeeper status............................................start"
+array=(node1 node2 node3)
+for node in ${array[@]}; do 
+echo "$node ......check zookeeper status";
+ssh root@$node   "/apps/jdk1.8.0_211/bin/jps | grep QuorumPeerMain"
+ssh root@$node   "/apps/apache-zookeeper-3.5.6-bin/bin/zkServer.sh status"
+done
 ```
 
 ## 停止服务
@@ -80,19 +95,6 @@ echo "$node ......stop zookeeper";
 ssh root@$node   "/apps/apache-zookeeper-3.5.6-bin/bin/zkServer.sh stop"
 done
 ```
-
-## 检查状态
-
-```BASH 
-echo "check zookeeper status............................................start"
-array=(node1 node2 node3)
-for node in ${array[@]}; do 
-echo "$node ......check zookeeper status";
-ssh root@$node   "/apps/apache-zookeeper-3.5.6-bin/bin/zkServer.sh status"
-done
-echo "check zookeeper status............................................end"
-```
-
 
 ## 卸载
 
