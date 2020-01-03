@@ -9,7 +9,6 @@
 
 
 
-
 ## 上传文件
 
 * 下载文件hadoop-3.1.2.tar.gz  
@@ -24,7 +23,7 @@ wget http://archive.apache.org/dist/hadoop/common/hadoop-3.1.2/hadoop-3.1.2.tar.
 
 ```BASH   
 
-tar -xzvf hadoop-*.tar.gz -C /apps
+tar -xzvf hadoop-3.1.2.tar.gz -C /apps
 rm -rf /apps/hadoop-3.1.2/share/doc/
 rm -rf /apps/hadoop-3.1.2/*.txt
 
@@ -42,6 +41,29 @@ export java_home_var=/apps/jdk1.8.0_211
 EOF
 
 source /apps/hadoop-3.1.2/etc/hadoop/param.sh
+
+# /apps/hadoop-3.1.2/sbin/start-dfs.sh  开始文件，配置启动用户
+sed -i '/^HDFS_DATANODE_USER.*/d' /apps/hadoop-3.1.2/sbin/start-dfs.sh
+sed -i '/^HDFS_DATANODE_SECURE_USER.*/d' /apps/hadoop-3.1.2/sbin/start-dfs.sh
+sed -i '/^HDFS_NAMENODE_USER.*/d' /apps/hadoop-3.1.2/sbin/start-dfs.sh
+sed -i '/^HDFS_SECONDARYNAMENODE_USER.*/d' /apps/hadoop-3.1.2/sbin/start-dfs.sh
+
+sed -i '17 aHDFS_DATANODE_USER=appuser'  /apps/hadoop-3.1.2/sbin/start-dfs.sh
+sed -i '17 aHDFS_DATANODE_SECURE_USER=appuser'  /apps/hadoop-3.1.2/sbin/start-dfs.sh
+sed -i '17 aHDFS_NAMENODE_USER=appuser'  /apps/hadoop-3.1.2/sbin/start-dfs.sh
+sed -i '17 aHDFS_SECONDARYNAMENODE_USER=appuser'  /apps/hadoop-3.1.2/sbin/start-dfs.sh
+
+# /apps/hadoop-3.1.2/sbin/stop-dfs.sh  开始文件，配置启动用户
+sed -i '/^HDFS_DATANODE_USER.*/d' /apps/hadoop-3.1.2/sbin/stop-dfs.sh
+sed -i '/^HDFS_DATANODE_SECURE_USER.*/d' /apps/hadoop-3.1.2/sbin/stop-dfs.sh
+sed -i '/^HDFS_NAMENODE_USER.*/d' /apps/hadoop-3.1.2/sbin/stop-dfs.sh
+sed -i '/^HDFS_SECONDARYNAMENODE_USER.*/d' /apps/hadoop-3.1.2/sbin/stop-dfs.sh
+
+sed -i '17 aHDFS_DATANODE_USER=appuser'  /apps/hadoop-3.1.2/sbin/stop-dfs.sh
+sed -i '17 aHDFS_DATANODE_SECURE_USER=appuser'  /apps/hadoop-3.1.2/sbin/stop-dfs.sh
+sed -i '17 aHDFS_NAMENODE_USER=appuser'  /apps/hadoop-3.1.2/sbin/stop-dfs.sh
+sed -i '17 aHDFS_SECONDARYNAMENODE_USER=appuser'  /apps/hadoop-3.1.2/sbin/stop-dfs.sh
+
 
 # 配置文件 /apps/hadoop-3.1.2/etc/hadoop/core-site.xml
 cat << EOF > /apps/hadoop-3.1.2/etc/hadoop/core-site.xml
@@ -139,6 +161,14 @@ cat << EOF > /apps/hadoop-3.1.2/etc/hadoop/mapred-site.xml
 </configuration>
 EOF
 
+# /apps/hadoop-3.1.2/etc/hadoop/workers 
+rm -rf /apps/hadoop-3.1.2/etc/hadoop/workers &&  touch /apps/hadoop-3.1.2/etc/hadoop/workers
+unset array
+array=${hdfs_nodes[@]}
+for node in ${array[@]}; do 
+echo $node >> /apps/hadoop-3.1.2/etc/hadoop/workers 
+done
+
 # 配置hdfs_home
 array=(node1 node2 node3 )
 for node in ${array[@]}; do 
@@ -149,8 +179,6 @@ ssh root@$node "echo 'export HADOOP_HOME=/apps/hadoop-3.1.2  # hdfs_home_var ' >
 ssh root@$node "echo 'export PATH=\$PATH:\$HADOOP_HOME/bin:\$HADOOP_HOME/sbin  # hdfs_path_var ' >> /etc/profile"
 ssh root@$node "source /etc/profile"
 done
-
-
 
 
 # 同步数据到点2、3
@@ -169,20 +197,8 @@ ssh root@$node "mkdir -p /data/hadoop/data/ "
 done
 rm -rf hadoop-3.1.2_new.tar.gz
 
-# 
-# array=(node2 node3 )
-# for node in ${array[@]}; do 
-# echo "send to $node ......";
-# ssh root@$node "ls /apps"
-# done
-
-```
-
-## 启动
-
-```bash 
 # 修改文件权限
-# array=(node1 node2 node3 )
+unset arrary
 array=${hdfs_nodes[@]}
 for node in ${array[@]}; do 
 echo "clear $node . set owner of the files ......";
@@ -192,27 +208,19 @@ ssh root@$node   "rm -rf    /data/hadoop/data/*"
 ssh root@$node   "rm -rf    /data/hadoop/name/*"
 done
 
+```
+
+## 启动
+
+```bash 
+source /apps/hadoop-3.1.2/etc/hadoop/param.sh
+# 格式化namenode，如果是重启，则不需要执行
+echo "format the namenode............................................."
+ssh appuser@$hdfs_name_node "/apps/hadoop-3.1.2/bin/hdfs namenode -format"
+sleep 10
+
 # 3.启动hdfs集群,打开hdfs集群，在namenode上执行，需要namenode到datanode做了免密登录
-sudo appuser
 start-dfs.sh
-
-# source /apps/hadoop-3.1.2/etc/hadoop/param.sh
-# echo "wait for 10 seconds before format............................................."
-# sleep 10
-# ssh appuser@$hdfs_name_node "/apps/hadoop-3.1.2/bin/hdfs namenode -format"
-# echo "wait for 5 seconds start hdfs............................................."
-# sleep 10
-# echo "start namenode............................................."
-# ssh appuser@$hdfs_name_node "/apps/hadoop-3.1.2/bin/hdfs --daemon start namenode && /apps/jdk1.8.0_211/bin/jps | grep NameNode"
-# sleep 5
-
-# echo "start secondnamenode............................................."
-# ssh appuser@$hdfs_name_node2 "/apps/hadoop-3.1.2/bin/hdfs --daemon start secondarynamenode && /apps/jdk1.8.0_211/bin/jps | grep SecondaryNameNode"
-
-# echo "start datanode............................................."
-# for node in ${hdfs_data_nodes[@]}; do 
-# ssh appuser@$node "/apps/hadoop-3.1.2/bin/hdfs --daemon start  datanode | /apps/jdk1.8.0_211/bin/jps | grep DataNode"
-# done 
 ```
 
 ## 检查
@@ -220,19 +228,20 @@ start-dfs.sh
 * 命令检查
 ```bash
 
+hdfs dfsadmin -report
+
 source /apps/hadoop-3.1.2/etc/hadoop/param.sh
-echo "check the NameNode ............................................."
-ssh appuser@$hdfs_name_node "/apps/jdk1.8.0_211/bin/jps | grep NameNode"
+# 检查进程
+echo "$hdfs_name_node NameNode:"
+ssh root@$hdfs_name_node "/apps/jdk1.8.0_211/bin/jps | grep NameNode"
 
-echo "check the SecondaryNameNode............................................."
-ssh appuser@$hdfs_name_node2 "/apps/jdk1.8.0_211/bin/jps | grep SecondaryNameNode"
+echo " @$hdfs_name_node2 SecondaryNameNode:"
+ssh root@$hdfs_name_node2 "/apps/jdk1.8.0_211/bin/jps | grep SecondaryNameNode"
 
-echo "check the DataNode............................................."
 for node in ${hdfs_data_nodes[@]}; do 
-echo "${node}"
-ssh appuser@$node " /apps/jdk1.8.0_211/bin/jps | grep DataNode"
+echo "${node} DataNode:"
+ssh root@$node " /apps/jdk1.8.0_211/bin/jps | grep DataNode"
 done 
-echo "check end............................................."
 
 ```
 
@@ -258,7 +267,6 @@ hadoop fs -ls /aaa/bbb
 hadoop fs -cat /aaa/bbb/1.file
 ```
 
-
 ## 停止
 
 ```bash 
@@ -278,7 +286,8 @@ ssh root@$node "sed -i '/hdfs_path_var/d' /etc/profile"
 ssh root@$node "rm -rf /apps/hadoop-3.1.2/"
 ssh root@$node "rm -rf /data/hadoop/"
 ssh root@$node "source /etc/profile"
-done
+done  
+
 ```
 
 ## 其他命令
