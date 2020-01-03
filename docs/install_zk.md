@@ -12,9 +12,7 @@
 wget http://mirror.bit.edu.cn/apache/zookeeper/zookeeper-3.5.6/apache-zookeeper-3.5.6-bin.tar.gz
 ```
 
-
 ## 安装 
-
 
 ```bash 
 # 安装文件
@@ -73,27 +71,74 @@ done
 ```
 
 
+## 设置开机启动 
+
+* 编辑启动文件``/etc/systemd/system/zookeeper.service``   
+
+```bash  
+cat << EOF > /etc/systemd/system/zookeeper.service
+[Unit]
+Description=zookeeper.service
+After=network.target
+[Service]
+Type=forking
+Environment=ZOO_LOG_DIR=/apps/apache-zookeeper-3.5.6-bin/logs
+Environment=PATH=/apps/jdk1.8.0_211/bin:/apps/jdk1.8.0_211/jre/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/root/bin:/root/bin
+ExecStart=/apps/apache-zookeeper-3.5.6-bin/bin/zkServer.sh start
+ExecStop=/apps/apache-zookeeper-3.5.6-bin/bin/zkServer.sh stop
+ExecReload=/apps/apache-zookeeper-3.5.6-bin/bin/zkServer.sh restart
+PIDFile=/apps/apache-zookeeper-3.5.6-bin/data/zookeeper_server.pid
+User=appuser
+[Install]
+WantedBy=multi-user.target
+EOF
+
+array=(node1 node2 node3)
+for node in ${array[@]}; do 
+echo "$node ......send the systemd file to other nodes.";
+scp -r /etc/systemd/system/zookeeper.service root@$node:/etc/systemd/system/
+ssh root@$node   "systemctl daemon-reload"
+ssh root@$node   "systemctl enable zookeeper"
+done 
+
+```
+
+*  启动 
+```BASH
+array=(node1 node2 node3)
+for node in ${array[@]}; do 
+echo "$node ......start zookeeper";
+ssh root@$node   "systemctl daemon-reload"
+ssh root@$node   "systemctl start zookeeper"
+done 
+
+```
+
 
 ## 检查状态
 
 ```BASH 
-echo "check zookeeper status............................................start"
 array=(node1 node2 node3)
 for node in ${array[@]}; do 
-echo "$node ......check zookeeper status";
+echo "$node ...............check zookeeper status......................";
 ssh root@$node   "/apps/jdk1.8.0_211/bin/jps | grep QuorumPeerMain"
 ssh root@$node   "/apps/apache-zookeeper-3.5.6-bin/bin/zkServer.sh status"
+ssh root@$node   "systemctl status zookeeper"
+echo "$node ................check zookeeper status end..................";
+echo ""
+echo ""
 done
 ```
 
 ## 停止服务
 
 ```BASH 
+# systemd关闭zookeeper
 array=(node1 node2 node3)
 for node in ${array[@]}; do 
 echo "$node ......stop zookeeper";
-ssh root@$node   "/apps/apache-zookeeper-3.5.6-bin/bin/zkServer.sh stop"
-done
+ssh root@$node   "systemctl stop zookeeper"
+done 
 ```
 
 ## 卸载
