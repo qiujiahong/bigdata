@@ -11,10 +11,10 @@
 
 ## 上传文件
 
-* 下载文件hadoop-3.1.2.tar.gz  
+* 下载文件hadoop-3.2.1.tar.gz  
 
 ```bash
-# wget http://archive.apache.org/dist/hadoop/common/hadoop-3.1.2/hadoop-3.1.2.tar.gz
+# wget http://archive.apache.org/dist/hadoop/common/hadoop-3.2.1/hadoop-3.1.2.tar.gz
 wget http://mirror.bit.edu.cn/apache/hadoop/common/hadoop-3.2.1/hadoop-3.2.1.tar.gz
 ```
 
@@ -24,15 +24,15 @@ wget http://mirror.bit.edu.cn/apache/hadoop/common/hadoop-3.2.1/hadoop-3.2.1.tar
 
 ```BASH   
 
-tar -xzvf hadoop-3.1.2.tar.gz -C /apps
-rm -rf /apps/hadoop-3.1.2/share/doc/
-rm -rf /apps/hadoop-3.1.2/*.txt
+tar -xzvf hadoop-3.2.1.tar.gz -C /apps
+rm -rf /apps/hadoop-3.2.1/share/doc/
+rm -rf /apps/hadoop-3.2.1/*.txt
 
 mkdir -p /data/hadoop/name/
 mkdir -p /data/hadoop/data/
 
-# 自定义配置文件 /apps/hadoop-3.1.2/etc/hadoop/param.sh
-cat << 'EOF' > /apps/hadoop-3.1.2/etc/hadoop/param.sh
+# 自定义配置文件 /apps/hadoop-3.2.1/etc/hadoop/param.sh
+cat << 'EOF' > /apps/hadoop-3.2.1/etc/hadoop/param.sh
 export hdfs_name_node=node1
 export hdfs_name_node2=node2
 export hdfs_data_nodes=(node1 node2 node3)
@@ -41,33 +41,33 @@ export hdfs_nodes=(node1 node2 node3)
 export java_home_var=/apps/jdk1.8.0_211
 EOF
 
-source /apps/hadoop-3.1.2/etc/hadoop/param.sh
+source /apps/hadoop-3.2.1/etc/hadoop/param.sh
 
-# /apps/hadoop-3.1.2/sbin/start-dfs.sh  开始文件，配置启动用户
-sed -i '/^HDFS_DATANODE_USER.*/d' /apps/hadoop-3.1.2/sbin/start-dfs.sh
-sed -i '/^HDFS_DATANODE_SECURE_USER.*/d' /apps/hadoop-3.1.2/sbin/start-dfs.sh
-sed -i '/^HDFS_NAMENODE_USER.*/d' /apps/hadoop-3.1.2/sbin/start-dfs.sh
-sed -i '/^HDFS_SECONDARYNAMENODE_USER.*/d' /apps/hadoop-3.1.2/sbin/start-dfs.sh
+# /apps/hadoop-3.2.1/sbin/start-dfs.sh  开始文件，配置启动用户
+sed -i '/^HDFS_DATANODE_USER.*/d' /apps/hadoop-3.2.1/sbin/start-dfs.sh
+sed -i '/^HDFS_DATANODE_SECURE_USER.*/d' /apps/hadoop-3.2.1/sbin/start-dfs.sh
+sed -i '/^HDFS_NAMENODE_USER.*/d' /apps/hadoop-3.2.1/sbin/start-dfs.sh
+sed -i '/^HDFS_SECONDARYNAMENODE_USER.*/d' /apps/hadoop-3.2.1/sbin/start-dfs.sh
 
-sed -i '17 aHDFS_DATANODE_USER=appuser'  /apps/hadoop-3.1.2/sbin/start-dfs.sh
-sed -i '17 aHDFS_DATANODE_SECURE_USER=appuser'  /apps/hadoop-3.1.2/sbin/start-dfs.sh
-sed -i '17 aHDFS_NAMENODE_USER=appuser'  /apps/hadoop-3.1.2/sbin/start-dfs.sh
-sed -i '17 aHDFS_SECONDARYNAMENODE_USER=appuser'  /apps/hadoop-3.1.2/sbin/start-dfs.sh
+sed -i '17 aHDFS_DATANODE_USER=appuser'  /apps/hadoop-3.2.1/sbin/start-dfs.sh
+sed -i '17 aHDFS_DATANODE_SECURE_USER=appuser'  /apps/hadoop-3.2.1/sbin/start-dfs.sh
+sed -i '17 aHDFS_NAMENODE_USER=appuser'  /apps/hadoop-3.2.1/sbin/start-dfs.sh
+sed -i '17 aHDFS_SECONDARYNAMENODE_USER=appuser'  /apps/hadoop-3.2.1/sbin/start-dfs.sh
 
-# /apps/hadoop-3.1.2/sbin/stop-dfs.sh  开始文件，配置启动用户
-sed -i '/^HDFS_DATANODE_USER.*/d' /apps/hadoop-3.1.2/sbin/stop-dfs.sh
-sed -i '/^HDFS_DATANODE_SECURE_USER.*/d' /apps/hadoop-3.1.2/sbin/stop-dfs.sh
-sed -i '/^HDFS_NAMENODE_USER.*/d' /apps/hadoop-3.1.2/sbin/stop-dfs.sh
-sed -i '/^HDFS_SECONDARYNAMENODE_USER.*/d' /apps/hadoop-3.1.2/sbin/stop-dfs.sh
+# /apps/hadoop-3.2.1/sbin/stop-dfs.sh  开始文件，配置启动用户
+sed -i '/^HDFS_DATANODE_USER.*/d' /apps/hadoop-3.2.1/sbin/stop-dfs.sh
+sed -i '/^HDFS_DATANODE_SECURE_USER.*/d' /apps/hadoop-3.2.1/sbin/stop-dfs.sh
+sed -i '/^HDFS_NAMENODE_USER.*/d' /apps/hadoop-3.2.1/sbin/stop-dfs.sh
+sed -i '/^HDFS_SECONDARYNAMENODE_USER.*/d' /apps/hadoop-3.2.1/sbin/stop-dfs.sh
 
-sed -i '17 aHDFS_DATANODE_USER=appuser'  /apps/hadoop-3.1.2/sbin/stop-dfs.sh
-sed -i '17 aHDFS_DATANODE_SECURE_USER=appuser'  /apps/hadoop-3.1.2/sbin/stop-dfs.sh
-sed -i '17 aHDFS_NAMENODE_USER=appuser'  /apps/hadoop-3.1.2/sbin/stop-dfs.sh
-sed -i '17 aHDFS_SECONDARYNAMENODE_USER=appuser'  /apps/hadoop-3.1.2/sbin/stop-dfs.sh
+sed -i '17 aHDFS_DATANODE_USER=appuser'  /apps/hadoop-3.2.1/sbin/stop-dfs.sh
+sed -i '17 aHDFS_DATANODE_SECURE_USER=appuser'  /apps/hadoop-3.2.1/sbin/stop-dfs.sh
+sed -i '17 aHDFS_NAMENODE_USER=appuser'  /apps/hadoop-3.2.1/sbin/stop-dfs.sh
+sed -i '17 aHDFS_SECONDARYNAMENODE_USER=appuser'  /apps/hadoop-3.2.1/sbin/stop-dfs.sh
 
 
-# 配置文件 /apps/hadoop-3.1.2/etc/hadoop/core-site.xml
-cat << EOF > /apps/hadoop-3.1.2/etc/hadoop/core-site.xml
+# 配置文件 /apps/hadoop-3.2.1/etc/hadoop/core-site.xml
+cat << EOF > /apps/hadoop-3.2.1/etc/hadoop/core-site.xml
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
 <!--
@@ -111,16 +111,16 @@ cat << EOF > /apps/hadoop-3.1.2/etc/hadoop/core-site.xml
 </configuration>
 EOF
 
-# 配置文件 /apps/hadoop-3.1.2/etc/hadoop/core-site.xml
-cp /apps/hadoop-3.1.2/etc/hadoop/hadoop-env.sh /apps/hadoop-3.1.2/etc/hadoop/hadoop-env.sh.bak
-cat << 'EOF' > /apps/hadoop-3.1.2/etc/hadoop/hadoop-env.sh
+# 配置文件 /apps/hadoop-3.2.1/etc/hadoop/core-site.xml
+cp /apps/hadoop-3.2.1/etc/hadoop/hadoop-env.sh /apps/hadoop-3.2.1/etc/hadoop/hadoop-env.sh.bak
+cat << 'EOF' > /apps/hadoop-3.2.1/etc/hadoop/hadoop-env.sh
 export JAVA_HOME=${java_home_var}
 export HADOOP_OS_TYPE=${HADOOP_OS_TYPE:-$(uname -s)}
 EOF
-sed -i s@\${java_home_var}@$java_home_var@g /apps/hadoop-3.1.2/etc/hadoop/hadoop-env.sh
+sed -i s@\${java_home_var}@$java_home_var@g /apps/hadoop-3.2.1/etc/hadoop/hadoop-env.sh
 
-# 配置文件 /apps/hadoop-3.1.2/etc/hadoop/hdfs-site.xml
-cat << EOF >  /apps/hadoop-3.1.2/etc/hadoop/hdfs-site.xml
+# 配置文件 /apps/hadoop-3.2.1/etc/hadoop/hdfs-site.xml
+cat << EOF >  /apps/hadoop-3.2.1/etc/hadoop/hdfs-site.xml
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
 <configuration>
@@ -151,7 +151,7 @@ cat << EOF >  /apps/hadoop-3.1.2/etc/hadoop/hdfs-site.xml
 </configuration>
 EOF
 
-cat << EOF > /apps/hadoop-3.1.2/etc/hadoop/mapred-site.xml
+cat << EOF > /apps/hadoop-3.2.1/etc/hadoop/mapred-site.xml
 <?xml version="1.0"?>
 <?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
 <configuration>
@@ -162,12 +162,12 @@ cat << EOF > /apps/hadoop-3.1.2/etc/hadoop/mapred-site.xml
 </configuration>
 EOF
 
-# /apps/hadoop-3.1.2/etc/hadoop/workers 
-rm -rf /apps/hadoop-3.1.2/etc/hadoop/workers &&  touch /apps/hadoop-3.1.2/etc/hadoop/workers
+# /apps/hadoop-3.2.1/etc/hadoop/workers 
+rm -rf /apps/hadoop-3.2.1/etc/hadoop/workers &&  touch /apps/hadoop-3.2.1/etc/hadoop/workers
 unset array
 array=${hdfs_nodes[@]}
 for node in ${array[@]}; do 
-echo $node >> /apps/hadoop-3.1.2/etc/hadoop/workers 
+echo $node >> /apps/hadoop-3.2.1/etc/hadoop/workers 
 done
 
 # 配置hdfs_home
@@ -176,7 +176,7 @@ for node in ${array[@]}; do
 echo "send to $node ......";
 ssh root@$node "sed -i '/hdfs_home_var/d' /etc/profile"
 ssh root@$node "sed -i '/hdfs_path_var/d' /etc/profile"
-ssh root@$node "echo 'export HADOOP_HOME=/apps/hadoop-3.1.2  # hdfs_home_var ' >> /etc/profile"
+ssh root@$node "echo 'export HADOOP_HOME=/apps/hadoop-3.2.1  # hdfs_home_var ' >> /etc/profile"
 ssh root@$node "echo 'export PATH=\$PATH:\$HADOOP_HOME/bin:\$HADOOP_HOME/sbin  # hdfs_path_var ' >> /etc/profile"
 ssh root@$node "source /etc/profile"
 done
@@ -184,26 +184,26 @@ done
 
 # 同步数据到点2、3
 cd /apps/
-rm -rf hadoop-3.1.2_new.tar.gz
-tar -czvf hadoop-3.1.2_new.tar.gz hadoop-3.1.2/*
+rm -rf hadoop-3.2.1_new.tar.gz
+tar -czvf hadoop-3.2.1_new.tar.gz hadoop-3.2.1/*
 array=(node2 node3 )
 for node in ${array[@]}; do 
 echo "send to $node ......";
-ssh root@$node "rm -rf /apps/hadoop-3.1.2 "
-ssh root@$node "rm -rf hadoop-3.1.2_new.tar.gz "
-scp  hadoop-3.1.2_new.tar.gz  root@$node:~
-ssh root@$node "tar -xzvf  hadoop-3.1.2_new.tar.gz -C /apps"
+ssh root@$node "rm -rf /apps/hadoop-3.2.1 "
+ssh root@$node "rm -rf hadoop-3.2.1_new.tar.gz "
+scp  hadoop-3.2.1_new.tar.gz  root@$node:~
+ssh root@$node "tar -xzvf  hadoop-3.2.1_new.tar.gz -C /apps"
 ssh root@$node "mkdir -p /data/hadoop/name/ "
 ssh root@$node "mkdir -p /data/hadoop/data/ "
 done
-rm -rf hadoop-3.1.2_new.tar.gz
+rm -rf hadoop-3.2.1_new.tar.gz
 
 # 修改文件权限
 unset arrary
 array=${hdfs_nodes[@]}
 for node in ${array[@]}; do 
 echo "clear $node . set owner of the files ......";
-ssh root@$node   "chown -R appuser:appuser   /apps/hadoop-3.1.2/"
+ssh root@$node   "chown -R appuser:appuser   /apps/hadoop-3.2.1/"
 ssh root@$node   "chown -R appuser:appuser   /data/hadoop/"
 ssh root@$node   "rm -rf    /data/hadoop/data/*"
 ssh root@$node   "rm -rf    /data/hadoop/name/*"
@@ -214,10 +214,10 @@ done
 ## 启动
 
 ```bash 
-source /apps/hadoop-3.1.2/etc/hadoop/param.sh
+source /apps/hadoop-3.2.1/etc/hadoop/param.sh
 # 格式化namenode，如果是重启，则不需要执行
 echo "format the namenode............................................."
-ssh appuser@$hdfs_name_node "/apps/hadoop-3.1.2/bin/hdfs namenode -format"
+ssh appuser@$hdfs_name_node "/apps/hadoop-3.2.1/bin/hdfs namenode -format"
 sleep 10
 
 # 3.启动hdfs集群,打开hdfs集群，在namenode上执行，需要namenode到datanode做了免密登录
@@ -231,7 +231,7 @@ start-dfs.sh
 
 hdfs dfsadmin -report
 
-source /apps/hadoop-3.1.2/etc/hadoop/param.sh
+source /apps/hadoop-3.2.1/etc/hadoop/param.sh
 # 检查进程
 echo "$hdfs_name_node NameNode:"
 ssh root@$hdfs_name_node "/apps/jdk1.8.0_211/bin/jps | grep NameNode"
@@ -284,7 +284,7 @@ for node in ${array[@]}; do
 echo "send to $node ......";
 ssh root@$node "sed -i '/hdfs_home_var/d' /etc/profile"
 ssh root@$node "sed -i '/hdfs_path_var/d' /etc/profile"
-ssh root@$node "rm -rf /apps/hadoop-3.1.2/"
+ssh root@$node "rm -rf /apps/hadoop-3.2.1/"
 ssh root@$node "rm -rf /data/hadoop/"
 ssh root@$node "source /etc/profile"
 done  
