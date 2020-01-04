@@ -15,7 +15,7 @@
 
 ```bash
 # wget http://archive.apache.org/dist/hadoop/common/hadoop-3.2.1/hadoop-3.1.2.tar.gz
-wget http://mirror.bit.edu.cn/apache/hadoop/common/hadoop-3.2.1/hadoop-3.2.1.tar.gz
+wget https://mirrors.tuna.tsinghua.edu.cn/apache/hadoop/common/hadoop-3.2.1/hadoop-3.2.1.tar.gz
 ```
 
 ## 安装
@@ -27,7 +27,7 @@ wget http://mirror.bit.edu.cn/apache/hadoop/common/hadoop-3.2.1/hadoop-3.2.1.tar
 tar -xzvf hadoop-3.2.1.tar.gz -C /apps
 rm -rf /apps/hadoop-3.2.1/share/doc/
 rm -rf /apps/hadoop-3.2.1/*.txt
-
+rm -rf /data/hadoop
 mkdir -p /data/hadoop/name/
 mkdir -p /data/hadoop/data/
 
@@ -36,7 +36,6 @@ cat << 'EOF' > /apps/hadoop-3.2.1/etc/hadoop/param.sh
 export hdfs_name_node=node1
 export hdfs_name_node2=node2
 export hdfs_data_nodes=(node1 node2 node3)
-# hdfs_name_node hdfs_data_nodes 合并
 export hdfs_nodes=(node1 node2 node3)
 export java_home_var=/apps/jdk1.8.0_211
 EOF
@@ -113,11 +112,10 @@ EOF
 
 # 配置文件 /apps/hadoop-3.2.1/etc/hadoop/core-site.xml
 cp /apps/hadoop-3.2.1/etc/hadoop/hadoop-env.sh /apps/hadoop-3.2.1/etc/hadoop/hadoop-env.sh.bak
-cat << 'EOF' > /apps/hadoop-3.2.1/etc/hadoop/hadoop-env.sh
+cat << EOF > /apps/hadoop-3.2.1/etc/hadoop/hadoop-env.sh
 export JAVA_HOME=${java_home_var}
-export HADOOP_OS_TYPE=${HADOOP_OS_TYPE:-$(uname -s)}
+export HADOOP_OS_TYPE=\${HADOOP_OS_TYPE:-\$(uname -s)}
 EOF
-sed -i s@\${java_home_var}@$java_home_var@g /apps/hadoop-3.2.1/etc/hadoop/hadoop-env.sh
 
 # 配置文件 /apps/hadoop-3.2.1/etc/hadoop/hdfs-site.xml
 cat << EOF >  /apps/hadoop-3.2.1/etc/hadoop/hdfs-site.xml
@@ -164,20 +162,17 @@ EOF
 
 # /apps/hadoop-3.2.1/etc/hadoop/workers 
 rm -rf /apps/hadoop-3.2.1/etc/hadoop/workers &&  touch /apps/hadoop-3.2.1/etc/hadoop/workers
-unset array
-array=${hdfs_nodes[@]}
-for node in ${array[@]}; do 
+for node in ${hdfs_nodes[@]}; do 
 echo $node >> /apps/hadoop-3.2.1/etc/hadoop/workers 
 done
 
 # 配置hdfs_home
-array=(node1 node2 node3 )
-for node in ${array[@]}; do 
+for node in ${hdfs_data_nodes[@]}; do 
 echo "send to $node ......";
-ssh root@$node "sed -i '/hdfs_home_var/d' /etc/profile"
-ssh root@$node "sed -i '/hdfs_path_var/d' /etc/profile"
-ssh root@$node "echo 'export HADOOP_HOME=/apps/hadoop-3.2.1  # hdfs_home_var ' >> /etc/profile"
-ssh root@$node "echo 'export PATH=\$PATH:\$HADOOP_HOME/bin:\$HADOOP_HOME/sbin  # hdfs_path_var ' >> /etc/profile"
+ssh root@$node "sed -i '/HDAOOP_HOME_VAR/d' /etc/profile"
+ssh root@$node "sed -i '/HDAOOP_PATH_VAR/d' /etc/profile"
+ssh root@$node "echo 'export HADOOP_HOME=/apps/hadoop-3.2.1  # HDAOOP_HOME_VAR ' >> /etc/profile"
+ssh root@$node "echo 'export PATH=\$PATH:\$HADOOP_HOME/bin:\$HADOOP_HOME/sbin  # HDAOOP_PATH_VAR ' >> /etc/profile"
 ssh root@$node "source /etc/profile"
 done
 
@@ -186,6 +181,7 @@ done
 cd /apps/
 rm -rf hadoop-3.2.1_new.tar.gz
 tar -czvf hadoop-3.2.1_new.tar.gz hadoop-3.2.1/*
+unset array
 array=(node2 node3 )
 for node in ${array[@]}; do 
 echo "send to $node ......";
@@ -193,15 +189,15 @@ ssh root@$node "rm -rf /apps/hadoop-3.2.1 "
 ssh root@$node "rm -rf hadoop-3.2.1_new.tar.gz "
 scp  hadoop-3.2.1_new.tar.gz  root@$node:~
 ssh root@$node "tar -xzvf  hadoop-3.2.1_new.tar.gz -C /apps"
+ssh root@$node "rm -rf /data/hadoop/ "
+ssh root@$node "rm -rf hadoop-3.2.1_new.tar.gz "
 ssh root@$node "mkdir -p /data/hadoop/name/ "
 ssh root@$node "mkdir -p /data/hadoop/data/ "
 done
 rm -rf hadoop-3.2.1_new.tar.gz
 
 # 修改文件权限
-unset arrary
-array=${hdfs_nodes[@]}
-for node in ${array[@]}; do 
+for node in ${hdfs_nodes[@]}; do 
 echo "clear $node . set owner of the files ......";
 ssh root@$node   "chown -R appuser:appuser   /apps/hadoop-3.2.1/"
 ssh root@$node   "chown -R appuser:appuser   /data/hadoop/"
@@ -221,6 +217,7 @@ ssh appuser@$hdfs_name_node "/apps/hadoop-3.2.1/bin/hdfs namenode -format"
 sleep 10
 
 # 3.启动hdfs集群,打开hdfs集群，在namenode上执行，需要namenode到datanode做了免密登录
+source /etc/profile
 start-dfs.sh
 ```
 
@@ -279,11 +276,10 @@ stop-dfs.sh
 
 ```bash
 
-array=(node1 node2 node3 )
-for node in ${array[@]}; do 
+for node in ${hdfs_nodes[@]}; do 
 echo "send to $node ......";
-ssh root@$node "sed -i '/hdfs_home_var/d' /etc/profile"
-ssh root@$node "sed -i '/hdfs_path_var/d' /etc/profile"
+ssh root@$node "sed -i '/HDAOOP_HOME_VAR/d' /etc/profile"
+ssh root@$node "sed -i '/HDAOOP_PATH_VAR/d' /etc/profile"
 ssh root@$node "rm -rf /apps/hadoop-3.2.1/"
 ssh root@$node "rm -rf /data/hadoop/"
 ssh root@$node "source /etc/profile"
