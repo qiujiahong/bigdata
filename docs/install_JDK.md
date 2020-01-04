@@ -12,7 +12,6 @@ rm -rf /apps/jdk*
 tar -xzvf jdk-8u211-linux-x64.tar.gz -C /apps/
 sed -i '/java_home_var/d' /etc/profile
 sed -i '/java_path_var/d' /etc/profile
-# sed -i '/java_home_var/d' ~/.bash_profile
 echo "export JAVA_HOME=/apps/jdk1.8.0_211  # java_home_var " >> /etc/profile
 echo "export PATH=\$PATH:\$JAVA_HOME/bin  # java_path_var " >> /etc/profile
 source /etc/profile

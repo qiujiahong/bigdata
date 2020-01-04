@@ -10,7 +10,10 @@
   * [安装JAVA](docs/install_JDK.md)
   * [安装zk](docs/install_zk.md)
   * [安装HDFS系统](docs/install_hdfs.md)
-  * [HDFS客户端](docs/command.md)
+  * [安装spark](docs/install_spark.md)
+
+
+* [HDFS客户端](docs/command.md)
 
   
 * [hive](docs/hive_introduce.md)
