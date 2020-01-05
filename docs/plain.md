@@ -2,9 +2,9 @@
 
 | 主机  | ip          | 说明                                     |
 |-------|-------------|------------------------------------------|
-| node1 | 10.170.0.7  | java、zk,hdfs(NameNode,DataNode)          |
-| node2 | 10.170.0.8  | java、zk,hdfs(SecondaryNameNode,DataNode) |
-| node3 | 10.170.0.9  | java、zk,hdfs(DataNode)                   |
+| node1 | 10.170.0.7  | java、zk,hdfs(NameNode,DataNode),spark(master)          |
+| node2 | 10.170.0.8  | java、zk,hdfs(SecondaryNameNode,DataNode),spark(worker) |
+| node3 | 10.170.0.9  | java、zk,hdfs(DataNode) ,spark(worker)                  |
 | node4 | 10.170.0.10 | java                                     |
 
 > node1、node2、node3、node4上都增加appuser用户和用户组
