@@ -5,8 +5,10 @@
 ## 计划
 
 在node1、node2、node3上安装spark，其中：
-* master          node1
+* master          node1 
 * slave           node2、node3
+
+> 需要再master 上做所有slave节点的免密登录
 
 
 ## 上传文件 
@@ -20,7 +22,7 @@ wget http://mirrors.tuna.tsinghua.edu.cn/apache/spark/spark-3.0.0-preview2/spark
 ## 安装scala 
 
 ```bash 
-#  准备文件(控制机上执行) 
+#  安装scala,准备文件(控制机上执行) 
 ## 自定义配置文件 
 cat << 'EOF' > param_spark.sh
 export spark_master_node_host=node2
@@ -40,7 +42,7 @@ ssh root@$node "tar -xzvf /tmp/scala-2.12.10.tgz  -C /apps/"
 ssh root@$node "sed -i '/SCALA_HOME_VAR/d' /etc/profile"
 ssh root@$node "sed -i '/SCALA_PATH_VAR/d' /etc/profile"
 ssh root@$node "echo 'export SCALA_HOME=/apps/scala-2.12.10  # SCALA_HOME_VAR ' >> /etc/profile"
-ssh root@$node "echo 'export PATH=\$PATH:\$SCALA_HOME/bin  # SCALA_PATH_VAR ' >> /etc/profile"
+ssh root@$node "echo 'export PATH=\$PATH:\$SCALA_HOME/bin      # SCALA_PATH_VAR ' >> /etc/profile"
 ssh root@$node "source /etc/profile && echo $PATH && scala -version"
 ### 清理文件
 ssh root@$node "rm -rf /tmp/scala-2.12.10.tgz"
@@ -71,12 +73,10 @@ export SPARK_EXECUTOR_MEMORY=1G
 EOF
 # 配置文件slaves
 rm -rf spark-3.0.0-preview2-bin-hadoop3.2/conf/slaves 
-touch park-3.0.0-preview2-bin-hadoop3.2/conf/slaves
 for node in ${spark_slave_nodes[@]}; do 
 echo "write $node to slaves...";
 echo "$node" >> spark-3.0.0-preview2-bin-hadoop3.2/conf/slaves
 done 
-
 
 ```
  
@@ -99,45 +99,13 @@ ssh root@$node "echo 'export PATH=\$PATH:\$SPARK_HOME/bin        # SPARK_PATH_VA
 ssh root@$node "rm -rf /tmp/spark-3.0.0-preview2-bin-hadoop3.2_new.tar.gz"
 done 
 
-
-
 rm -rf spark-3.0.0-preview2-bin-hadoop3.2_new.tar.gz
-
-```
-
-
-* 安装spark   
-
-```bash
-tar -xzvf spark-3.0.0-preview2-bin-hadoop3.2.tgz -C /apps/
-# SPARK_HOME
-sed -i '/SPARK_HOME_VAR/d' /etc/profile
-sed -i '/SPARK_PATH_VAR/d' /etc/profile
-echo "export SPARK_HOME=/apps/spark-3.0.0-preview2-bin-hadoop3.2/  # SPARK_HOME_VAR " >> /etc/profile
-echo "export PATH=\$PATH:\$SPARK_HOME/bin  # SPARK_PATH_VAR " >> /etc/profile
-source /etc/profile
-
-# 配置文件
-rm -rf /apps/spark-3.0.0-preview2-bin-hadoop3.2/conf/spark-env.sh
-cp /apps/spark-3.0.0-preview2-bin-hadoop3.2/conf/spark-env.sh.template /apps/spark-3.0.0-preview2-bin-hadoop3.2/conf/spark-env.sh
-cat << EOF >> /apps/spark-3.0.0-preview2-bin-hadoop3.2/conf/spark-env.sh
-export SCALA_HOME=/apps/scala-2.12.10/
-export JAVA_HOME=$java_home_var
-export HADOOP_HOME=/apps/hadoop-3.1.2/
-export HADOOP_CONF_DIR=\$HADOOP_HOME/etc/hadoop
-export SPARK_HOME=/apps/spark-3.0.0-preview2-bin-hadoop3.2/
-export SPARK_MASTER_HOST=$spark_master_node_host
-export SPARK_LOCAL_IP=$spark_master_node_host
-export SPARK_EXECUTOR_MEMORY=1G
-EOF
 
 # slave配置文件微调
 for node in ${spark_slave_nodes[@]}; do 
 ssh root@$node " sed -i '/SPARK_LOCAL_IP=/d' /apps/spark-3.0.0-preview2-bin-hadoop3.2/conf/spark-env.sh"
 done 
-
 ```
-
 
 ## 启动
 
