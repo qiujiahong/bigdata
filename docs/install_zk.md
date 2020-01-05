@@ -15,60 +15,95 @@ wget http://mirror.bit.edu.cn/apache/zookeeper/zookeeper-3.5.6/apache-zookeeper-
 ## 安装 
 
 ```bash 
-# 安装文件
-array=(node1 node2 node3)
-for((i=1;i<=${#array[*]};i++)); do 
-num=$(($i-1))
-echo "${array[$num]}......start";
-scp apache-zookeeper-3.5.6-bin.tar.gz root@$node:/root
-ssh root@$node "rm -rf /apps/apache-zookeeper-3.5.6-bin/"
-ssh root@$node "tar -xzvf /root/apache-zookeeper-3.5.6-bin.tar.gz -C /apps/"
-ssh root@$node "rm -rf /root/apache-zookeeper-3.5.6-bin.tar.gz"
-ssh root@${array[$num]} "mkdir -p /apps/apache-zookeeper-3.5.6-bin/data"
-ssh root@${array[$num]} "mkdir -p /apps/apache-zookeeper-3.5.6-bin/logs"
-ssh root@${array[$num]} "echo $i > /apps/apache-zookeeper-3.5.6-bin/data/myid"
-ssh root@${array[$num]} "rm -rf apache-zookeeper-3.5.6-bin.tar.gz"
-ssh root@${array[$num]} "echo ${array[$num]}......end"
-ssh root@${array[$num]} "cat /apps/apache-zookeeper-3.5.6-bin/data/myid"
-ssh root@${array[$num]} "echo ${array[$num]}......end"
+#  安装zk,准备文件(控制机上执行) 
+## 自定义配置文件 
+cat << 'EOF' > param_zk.sh
+export zk_nodes=(node1 node2 node3)
+export java_home_var=/apps/jdk1.8.0_211
+EOF
+source param_zk.sh
+
+rm -rf apache-zookeeper-3.5.6-bin
+tar -xzvf apache-zookeeper-3.5.6-bin.tar.gz
+mkdir -p apache-zookeeper-3.5.6-bin/data
+mkdir -p apache-zookeeper-3.5.6-bin/logs
+
+# zkEnv.sh
+sed -i "/java_home_var/d" apache-zookeeper-3.5.6-bin/bin/zkEnv.sh
+sed -i "1 aexport JAVA_HOME=$java_home_var  # java_home_var"  apache-zookeeper-3.5.6-bin/bin/zkEnv.sh
+
+cat << EOF > apache-zookeeper-3.5.6-bin/conf/zoo.cfg
+# The number of milliseconds of each tick
+tickTime=2000
+# The number of ticks that the initial
+# synchronization phase can take
+initLimit=10
+# The number of ticks that can pass between
+# sending a request and getting an acknowledgement
+syncLimit=5
+# the directory where the snapshot is stored.
+# do not use /tmp for storage, /tmp here is just
+# example sakes.
+dataDir=/apps/apache-zookeeper-3.5.6-bin/data
+# the port at which the clients will connect
+clientPort=2181
+# the maximum number of client connections.
+# increase this if you need to handle more clients
+#maxClientCnxns=60
+#
+# Be sure to read the maintenance section of the
+# administrator guide before turning on autopurge.
+#
+# http://zookeeper.apache.org/doc/current/zookeeperAdmin.html#sc_maintenance
+#
+# The number of snapshots to retain in dataDir
+#autopurge.snapRetainCount=3
+# Purge task interval in hours
+# Set to "0" to disable auto purge feature
+#autopurge.purgeInterval=1
+dataLogDir=/apps/apache-zookeeper-3.5.6-bin/logs
+EOF
+
+for((i=1;i<=${#zk_nodes[*]};i++)); do 
+  num=$(($i-1))
+  echo "${zk_nodes[$num]}......start";
+  echo "server.$i=${zk_nodes[$num]}:2888:3888" >> apache-zookeeper-3.5.6-bin/conf/zoo.cfg
 done ;
 
-# 配置文件
-array=(node1 node2 node3)
-for node in ${array[@]}; do 
-echo "$node ......config file";
-ssh root@$node "mkdir -p /apps/apache-zookeeper-3.5.6-bin/data"
-ssh root@$node "mkdir -p /apps/apache-zookeeper-3.5.6-bin/logs"
-ssh  root@$node "rm -rf /apps/apache-zookeeper-3.5.6-bin/conf/zoo.cfg"
-ssh  root@$node "cp /apps/apache-zookeeper-3.5.6-bin/conf/zoo_sample.cfg /apps/apache-zookeeper-3.5.6-bin/conf/zoo.cfg"
-ssh root@$node  "sed -i \"s/^dataDir=.*/dataDir=\/apps\/apache-zookeeper-3.5.6-bin\/data/g\" /apps/apache-zookeeper-3.5.6-bin/conf/zoo.cfg"
-ssh root@$node  "sed -i \"s/^dataLogDir=.*/dataLogDir=\/apps\/apache-zookeeper-3.5.6-bin\/logs/g\" /apps/apache-zookeeper-3.5.6-bin/conf/zoo.cfg"
-ssh root@$node   "echo 'dataLogDir=/apps/apache-zookeeper-3.5.6-bin/logs' >>  /apps/apache-zookeeper-3.5.6-bin/conf/zoo.cfg"
-ssh root@$node   "echo 'server.1=node1:2888:3888' >>  /apps/apache-zookeeper-3.5.6-bin/conf/zoo.cfg"
-ssh root@$node   "echo 'server.2=node2:2888:3888' >>  /apps/apache-zookeeper-3.5.6-bin/conf/zoo.cfg"
-ssh root@$node   "echo 'server.3=node3:2888:3888' >>  /apps/apache-zookeeper-3.5.6-bin/conf/zoo.cfg"
-done
-
-# 配置JAVA_HOME环境变量
-array=(node1 node2 node3)
-for node in ${array[@]}; do 
-echo "$node ......config file";
-ssh root@$node   "sed -i '/java_home_var/d' /apps/apache-zookeeper-3.5.6-bin/bin/zkEnv.sh"
-ssh root@$node   "sed -i '1 aexport JAVA_HOME=/apps/jdk1.8.0_211  # java_home_var'  /apps/apache-zookeeper-3.5.6-bin/bin/zkEnv.sh"
-done
 ```
 
-## 启动服务
+```bash 
+# 同步文件 
+rm -rf apache-zookeeper-3.5.6-bin_new.tar.gz
+tar -czvf apache-zookeeper-3.5.6-bin_new.tar.gz apache-zookeeper-3.5.6-bin/*
+for node in ${zk_nodes[@]}; do 
+echo "send to $node ......";
+scp apache-zookeeper-3.5.6-bin_new.tar.gz root@$node:/tmp/
+ssh root@$node "tar -xzvf /tmp/apache-zookeeper-3.5.6-bin_new.tar.gz -C /apps/"
+ssh root@$node "sed -i '/ZOOKEEPER_HOME_VAR/d' /etc/profile"
+ssh root@$node "sed -i '/ZOOKEEPER_PATH_VAR/d' /etc/profile"
+ssh root@$node "echo 'export ZOOKEEPER_HOME=/apps/apache-zookeeper-3.5.6-bin/   # ZOOKEEPER_HOME_VAR ' >> /etc/profile"
+ssh root@$node "echo 'export PATH=\$PATH:\$ZOOKEEPER_HOME/bin                     # ZOOKEEPER_PATH_VAR ' >> /etc/profile"
+# clear install package
+ssh root@$node "rm -rf /tmp/apache-zookeeper-3.5.6-bin_new.tar.gz"
+done 
+rm -rf spark-3.0.0-preview2-bin-hadoop3.2_new.tar.gz
 
-```BASH 
-array=(node1 node2 node3)
-for node in ${array[@]}; do 
+# myid
+for((i=1;i<=${#zk_nodes[*]};i++)); do 
+  num=$(($i-1))
+  echo "${zk_nodes[$num]}......start";
+  ssh root@${zk_nodes[$num]} "echo $i > /apps/apache-zookeeper-3.5.6-bin/data/myid"
+done ;
+
+# 修改文件所有权
+for node in ${zk_nodes[@]}; do 
 echo "$node ......start zookeeper";
 ssh root@$node   "chown -R appuser:appuser   /apps/apache-zookeeper-3.5.6-bin/"
-# 注意这里是使用非root启动
-ssh appuser@$node   "/apps/apache-zookeeper-3.5.6-bin/bin/zkServer.sh start"
 done 
+
 ```
+
 
 
 ## 设置开机启动 
@@ -93,8 +128,7 @@ User=appuser
 WantedBy=multi-user.target
 EOF
 
-array=(node1 node2 node3)
-for node in ${array[@]}; do 
+for node in ${zk_nodes[@]}; do 
 echo "$node ......send the systemd file to other nodes.";
 scp -r /etc/systemd/system/zookeeper.service root@$node:/etc/systemd/system/
 ssh root@$node   "systemctl daemon-reload"
@@ -103,10 +137,9 @@ done
 
 ```
 
-*  启动 
+##  启动服务
 ```BASH
-array=(node1 node2 node3)
-for node in ${array[@]}; do 
+for node in ${zk_nodes[@]}; do 
 echo "$node ......start zookeeper";
 ssh root@$node   "systemctl daemon-reload"
 ssh root@$node   "systemctl start zookeeper"
@@ -118,8 +151,7 @@ done
 ## 检查状态
 
 ```BASH 
-array=(node1 node2 node3)
-for node in ${array[@]}; do 
+for node in ${zk_nodes[@]}; do 
 echo "$node ...............check zookeeper status......................";
 ssh root@$node   "/apps/jdk1.8.0_211/bin/jps | grep QuorumPeerMain"
 ssh root@$node   "/apps/apache-zookeeper-3.5.6-bin/bin/zkServer.sh status"
@@ -134,8 +166,7 @@ done
 
 ```BASH 
 # systemd关闭zookeeper
-array=(node1 node2 node3)
-for node in ${array[@]}; do 
+for node in ${zk_nodes[@]}; do 
 echo "$node ......stop zookeeper";
 ssh root@$node   "systemctl stop zookeeper"
 done 
@@ -144,11 +175,17 @@ done
 ## 卸载
 
 ```bash
-array=(node1 node2 node3)
-for((i=1;i<=${#array[*]};i++)); do 
-num=$(($i-1))
-echo "${array[$num]}......";
-ssh root@${array[$num]} "rm -rf apache-zookeeper-3.5.6-bin.tar.gz"
+
+for node in ${zk_nodes[@]}; do 
+echo "$node ......stop zookeeper";
+ssh root@$node "rm -rf apache-zookeeper-3.5.6-bin.tar.gz"
 ssh root@$node "rm -rf /apps/apache-zookeeper-3.5.6-bin/"
-done ;
+ssh root@$node "systemctl stop zookeeper"
+ssh root@$node "systemctl disable zookeeper"
+ssh root@$node "rm -rf /etc/systemd/system/zookeeper.service"
+ssh root@$node "systemctl daemon-reload"
+ssh root@$node "sed -i '/ZOOKEEPER_HOME_VAR/d' /etc/profile"
+ssh root@$node "sed -i '/ZOOKEEPER_PATH_VAR/d' /etc/profile"
+done 
+
 ```  
