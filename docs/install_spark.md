@@ -160,13 +160,14 @@ http://192.168.2.11:8080/
 
 ```bash 
 for node in ${spark_nodes[@]}; do 
+echo "Remove spark from $node...."
 ssh root@$node "sed -i '/SCALA_HOME_VAR/d' /etc/profile"
 ssh root@$node "sed -i '/SCALA_PATH_VAR/d' /etc/profile"
 ssh root@$node "sed -i '/SPARK_HOME_VAR/d' /etc/profile"
 ssh root@$node "sed -i '/SPARK_PATH_VAR/d' /etc/profile"
 ssh root@$node "source /etc/profile"
-rm -rf /apps/spark-3.0.0-preview2-bin-hadoop3.2/
-rm -rf /apps/scala-2.12.10/
+rm -rf /apps/spark-3.0.0-preview2-bin-hadoop3.2
+rm -rf /apps/scala-2.12.10
 rm -rf /tmp/scala-*
 done 
 ```
