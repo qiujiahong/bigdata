@@ -1,6 +1,6 @@
 # 安装zk
 
-## 计划
+## 规划
 
 在node1、node2、node3上安装zk 
 

@@ -1,6 +1,6 @@
 # 安装HDFS系统
 
-## 计划
+## 规划
 
 在node1、node2、node3上安装hadoop，其中：
 * dfs.namenode.secondary  node2 

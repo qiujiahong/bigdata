@@ -2,7 +2,7 @@
 
 
 
-## 计划
+## 规划
 
 在node1、node2、node3上安装spark，其中：
 * master          node1 
