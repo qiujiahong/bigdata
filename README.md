@@ -16,8 +16,8 @@
 * [HDFS客户端](docs/command.md)
 
   
-* [hive](docs/hive_introduce.md)
-* [hbase](docs/hbase_introduce.md)
+* [hive - todo](docs/hive_introduce.md)
+* [hbase - todo ](docs/hbase_introduce.md)
 * [kylin](docs/kylin_introduce.md)
     
 
